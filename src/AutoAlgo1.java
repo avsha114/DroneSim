@@ -183,11 +183,13 @@ public class AutoAlgo1 {
 	
 	boolean is_lidars_max = false;
 
+	// OUR CHANGE from 100 to 50:
 	double max_distance_between_points = 50;
 	
 
 	// Our extensions:
 	long startTime;
+	Point startPoint;
 
 	
 	Point init_point;
@@ -200,15 +202,18 @@ public class AutoAlgo1 {
 		if(is_init) {
 			speedUp();
 
+			// OUR CHANGES:
 			startTime = System.currentTimeMillis();
+			startPoint = drone.getOpticalSensorLocation();
+			Point dronePoint = startPoint;
 
-			Point dronePoint = drone.getOpticalSensorLocation();
 			init_point = new Point(dronePoint);
 			points.add(dronePoint);
 			mGraph.addVertex(dronePoint);
 			is_init = false;
 		}
 
+		// OUR CHANGE: if battery/time has run out - return home:
 		if ((System.currentTimeMillis() - startTime)/1000 >= 240)
 			SimulationWindow.return_home = true;
 
@@ -225,7 +230,6 @@ public class AutoAlgo1 {
 				}
 			}
 		} else {
-			System.out.println("Checking isCollide "+!drone.realMap.isCollide((int)dronePoint.x, (int)dronePoint.y));
 			if( Tools.getDistanceBetweenPoints(getLastPoint(), dronePoint) >=  max_distance_between_points
 				&& !drone.realMap.isCollide((int)dronePoint.x, (int)dronePoint.y)) {
 				points.add(dronePoint);
@@ -260,13 +264,9 @@ public class AutoAlgo1 {
 				
 				Lidar lidar2 = drone.lidars.get(2);
 				double b = lidar2.current_distance;
-				
-				
-				
+
 				int spin_by = max_angle_risky;
-			
-			
-				
+
 				if(a > 270 && b > 270) {
 					is_lidars_max = true;
 					Point l1 = Tools.getPointByDistance(dronePoint, lidar1.degrees + drone.getGyroRotation(), lidar1.current_distance);
@@ -290,14 +290,12 @@ public class AutoAlgo1 {
 					if(SimulationWindow.return_home) {
 						spin_by *= -1;
 					}
-					
-					
+
 					if(dis_to_lidar1 < dis_to_lidar2) {
 						
 						spin_by *= (-1 ); 
 					}
 				} else {
-					
 					
 					if(a < b ) {
 						spin_by *= (-1 ); 
