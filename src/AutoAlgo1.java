@@ -125,50 +125,6 @@ public class AutoAlgo1 {
 			map[xi][yi] = state; 
 		}
 	}
-	/*
-	
-	public void fineEdges(int x,int y) {
-		int radius = 6;
-		
-		for(int i=y-radius;i<y+radius;i++) {
-			for(int j=x-radius;j<x+radius;j++) {
-				if(Math.abs(y-i) <= 1 && Math.abs(x-j) <= 1) {
-					continue;
-				}
-				if(map[i][j] == PixelState.blocked) {
-					blockLine(x,y,j,i);
-				}
-			}
-		}
-	}
-	*/
-	/*
-	public void blockLine(int x0,int y0,int x1,int y1) {
-		if(x0 > x1) {
-			int tempX = x0;
-			int tempY = y0;
-			x0 = x1;
-			y0 = y1;
-			x1 = tempX;
-			y1 = tempY;
-		}
-		
-	     double deltax = x1 - x0;
-	     double deltay = y1 - y0;
-	     double deltaerr = Math.abs(deltay / deltax);    // Assume deltax != 0 (line is not vertical),
-	     double error = 0.0; // No error at start
-	     int y = y0;
-	     for (int x=x0;x<x1;x++) {
-	    	 setPixel(x,y,PixelState.blocked);
-	         error = error + deltaerr;
-	         if( 2*error >= deltax ) {
-                y = y + 1;
-                error=error - deltax;
-	        }
-	     }
-	
-	}
-	*/
 	
 	public void paintBlindMap(Graphics g) {
 		Color c = g.getColor();
@@ -218,18 +174,6 @@ public class AutoAlgo1 {
 	}
 	
 	boolean is_init = true;
-	double lastFrontLidarDis = 0;
-	boolean isRotateRight = false;
-	double changedRight = 0;
-	double changedLeft = 0;
-	boolean tryToEscape = false;
-	int leftOrRight = 1;
-	
-
-	double max_rotation_to_direction = 20;
-	boolean  is_finish = true;
-	boolean isLeftRightRotationEnable = true;
-	
 	
 	boolean is_risky = false;
 	int max_risky_distance = 150;
@@ -238,12 +182,9 @@ public class AutoAlgo1 {
 	int max_angle_risky = 10;
 	
 	boolean is_lidars_max = false;
-	
-	double save_point_after_seconds = 3;
-	
+
 	double max_distance_between_points = 50;
 	
-	boolean start_return_home = false;
 
 	// Our extensions:
 	long startTime;
@@ -266,10 +207,6 @@ public class AutoAlgo1 {
 			points.add(dronePoint);
 			mGraph.addVertex(dronePoint);
 			is_init = false;
-		}
-		
-		if(isLeftRightRotationEnable) {
-			//doLeftRight();
 		}
 
 		if ((System.currentTimeMillis() - startTime)/1000 >= 240)
@@ -295,8 +232,6 @@ public class AutoAlgo1 {
 				mGraph.addVertex(dronePoint);
 			}
 		}
-	
-		
 		
 		if(!is_risky) {
 			Lidar lidar = drone.lidars.get(0);
@@ -383,24 +318,9 @@ public class AutoAlgo1 {
 			
 		//}
 	}
-	
+
 	int counter = 0;
-	
-	public void doLeftRight() {
-		if(is_finish) {
-			leftOrRight *= -1;
-			counter++;
-			is_finish = false;
-			
-			spinBy(max_rotation_to_direction*leftOrRight,false,new Func() {
-				@Override
-				public void method() {
-					is_finish = true;
-				}
-			});
-		}
-	}
-	
+
 	
 	double lastGyroRotation = 0;
 	public void updateRotating(int deltaTime) {
@@ -430,8 +350,8 @@ public class AutoAlgo1 {
 				just_rotated = 360 + just_rotated;
 			}
 		}
-		
-	
+
+
 		 
 		lastGyroRotation = curr;
 		degrees_left_to_rotate-=just_rotated;
@@ -473,25 +393,12 @@ public class AutoAlgo1 {
 		
 		isRotating =1;
 	}
-	
-	public void spinBy(double degrees,boolean isFirst) {
-		lastGyroRotation = drone.getGyroRotation();
-		if(isFirst) {
-			degrees_left.add(0,degrees);
-			degrees_left_func.add(0,null);
-		
-			
-		} else {
-			degrees_left.add(degrees);
-			degrees_left_func.add(null);
-		}
-		
-		isRotating =1;
-	}
-	
+
+
+
 	public void spinBy(double degrees) {
 		lastGyroRotation = drone.getGyroRotation();
-		
+
 		degrees_left.add(degrees);
 		degrees_left_func.add(null);
 		isRotating = 1;

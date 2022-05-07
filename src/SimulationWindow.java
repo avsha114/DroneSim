@@ -35,6 +35,8 @@ public class SimulationWindow {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 
+		// OUR CHANGE:
+		// Save screen size:
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();;
 
 		/*
@@ -54,7 +56,7 @@ public class SimulationWindow {
 				  toogleStop = !toogleStop;
 			  }
 		});
-		stopBtn.setBounds(screenSize.width-200, 50, 100, 30);
+		stopBtn.setBounds(screenSize.width - 200, 50, 100, 30);
 		frame.getContentPane().add(stopBtn);
 		/*
 		 * Speeds
@@ -69,7 +71,7 @@ public class SimulationWindow {
 				  algo1.speedUp();
 			  }
 		});
-		speedBtn1.setBounds(screenSize.width-250, 100, 100, 30);
+		speedBtn1.setBounds(screenSize.width - 250, 100, 100, 30);
 		frame.getContentPane().add(speedBtn1);
 		
 		JButton speedBtn2 = new JButton("speedDown");
@@ -275,7 +277,7 @@ public class SimulationWindow {
 				new Point(84,73),
 				new Point(92,100)};
 		
-		Map map = new Map("E:\\robots\\task1\\DroneSimulator\\Maps\\p1" + map_num + ".png",startPoints[map_num-1]);
+		Map map = new Map("E:\\robots\\task1\\DroneSim\\Maps\\p1" + map_num + ".png",startPoints[map_num-1]);
 		
 		algo1 = new AutoAlgo1(map);
 		
