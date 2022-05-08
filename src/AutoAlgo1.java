@@ -80,7 +80,6 @@ public class AutoAlgo1 {
 	
 	public void speedDown() {
 		isSpeedUp = false;
-		isRotating = 0;
 	}
 	
 	public void updateMapByLidars() {
@@ -190,8 +189,8 @@ public class AutoAlgo1 {
 	// Our extensions:
 	long startTime;
 	Point startPoint;
+	boolean activeMission = true;
 
-	
 	Point init_point;
 	public void ai(int deltaTime) {
 		if(!SimulationWindow.toogleAI) {
@@ -214,9 +213,9 @@ public class AutoAlgo1 {
 		}
 
 		// OUR CHANGE: if battery/time has run out - return home:
-		if ((System.currentTimeMillis() - startTime)/1000 >= 240)
+		if ((System.currentTimeMillis() - startTime)/1000 >= 240) {
 			SimulationWindow.return_home = true;
-
+		}
 		Point dronePoint = drone.getOpticalSensorLocation();
 
 		
@@ -231,7 +230,9 @@ public class AutoAlgo1 {
 			}
 		} else {
 			if( Tools.getDistanceBetweenPoints(getLastPoint(), dronePoint) >=  max_distance_between_points
-				&& !drone.realMap.isCollide((int)dronePoint.x, (int)dronePoint.y)) {
+
+//				&& !drone.realMap.isCollide((int)dronePoint.x, (int)dronePoint.y)
+			) {
 				points.add(dronePoint);
 				mGraph.addVertex(dronePoint);
 			}
@@ -259,51 +260,72 @@ public class AutoAlgo1 {
 		} else {
 			if(!try_to_escape) {
 				try_to_escape = true;
+
+				Lidar lidar0 = drone.lidars.get(0);
+				double frontLidarDistance = lidar0.current_distance;
+
 				Lidar lidar1 = drone.lidars.get(1);
-				double a = lidar1.current_distance;
+				double rightLidarDistance = lidar1.current_distance;
 				
 				Lidar lidar2 = drone.lidars.get(2);
-				double b = lidar2.current_distance;
+				double leftLidarDistance = lidar2.current_distance;
 
-				int spin_by = max_angle_risky;
+				int rotationAngle = 0;
 
-				if(a > 270 && b > 270) {
-					is_lidars_max = true;
-					Point l1 = Tools.getPointByDistance(dronePoint, lidar1.degrees + drone.getGyroRotation(), lidar1.current_distance);
-					Point l2 = Tools.getPointByDistance(dronePoint, lidar2.degrees + drone.getGyroRotation(), lidar2.current_distance);
-					Point last_point = getAvgLastPoint();
-					double dis_to_lidar1 = Tools.getDistanceBetweenPoints(last_point,l1);
-					double dis_to_lidar2 = Tools.getDistanceBetweenPoints(last_point,l2);
-					
-					if(SimulationWindow.return_home) {
-						if( Tools.getDistanceBetweenPoints(getLastPoint(), dronePoint) <  max_distance_between_points) {
-							removeLastPoint();
-						}
-					} else {
-						if( Tools.getDistanceBetweenPoints(getLastPoint(), dronePoint) >=  max_distance_between_points) {
-							points.add(dronePoint);
-							mGraph.addVertex(dronePoint);
-						}
-					}
-					
-					spin_by = 90;
-					if(SimulationWindow.return_home) {
-						spin_by *= -1;
+				if (!SimulationWindow.return_home){
+					if (leftLidarDistance > 250 ) {
+						rotationAngle = -90;
 					}
 
-					if(dis_to_lidar1 < dis_to_lidar2) {
-						
-						spin_by *= (-1 ); 
+					if (leftLidarDistance < 90 && leftLidarDistance > 0 ) {
+						rotationAngle = 5;
 					}
+
+					if (rightLidarDistance < 80 && rightLidarDistance > 0 ) {
+						rotationAngle = -10;
+					}
+
+					if (leftLidarDistance > 120 ) {
+						rotationAngle = -5;
+					}
+
+					if (frontLidarDistance < 120 && frontLidarDistance > 0) {
+						rotationAngle = 90;
+					}
+//
 				} else {
-					
-					if(a < b ) {
-						spin_by *= (-1 ); 
+					if (rightLidarDistance > 250) {
+						rotationAngle = 90;
+					}
+
+					if (rightLidarDistance < 90 && rightLidarDistance > 0) {
+						rotationAngle = -5;
+					}
+
+					if (leftLidarDistance < 80 && leftLidarDistance > 0) {
+						rotationAngle = 10;
+					}
+
+					if (rightLidarDistance > 120 ) {
+						rotationAngle = 5;
+					}
+
+					if (frontLidarDistance < 120 && frontLidarDistance > 0) {
+						rotationAngle = -90;
+					}
+
+					if (activeMission){
+						rotationAngle = 90;
+						activeMission = false;
+					}
+
+
+
+					if (Tools.getDistanceBetweenPoints(this.getLastPoint(), dronePoint) < this.max_distance_between_points) {
+						this.removeLastPoint();
 					}
 				}
-				
-				
-				
+
 				spinBy(spin_by,true,new Func() { 
 						@Override
 						public void method() {
@@ -319,7 +341,7 @@ public class AutoAlgo1 {
 
 	int counter = 0;
 
-	
+
 	double lastGyroRotation = 0;
 	public void updateRotating(int deltaTime) {
 		
