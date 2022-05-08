@@ -188,9 +188,10 @@ public class AutoAlgo1 {
 	// Our extensions:
 	long startTime;
 	Point startPoint;
-	boolean activeMission = true;
 
 	Point init_point;
+	boolean first_return = false;
+	int very_far = 250;
 	public void ai(int deltaTime) {
 		if(!SimulationWindow.toogleAI) {
 			return;
@@ -211,9 +212,10 @@ public class AutoAlgo1 {
 			is_init = false;
 		}
 
-		// OUR CHANGE: if battery/time has run out - return home:
-		if ((System.currentTimeMillis() - startTime)/1000 >= 240) {
+		// OUR CHANGE: if battery/time has run out - return home and doing rotation of 180 :
+		if ((System.currentTimeMillis() - startTime)/1000 >= 60 && (System.currentTimeMillis() - startTime)/1000 < 62) {
 			SimulationWindow.return_home = true;
+			first_return = true;
 		}
 		Point dronePoint = drone.getOpticalSensorLocation();
 
@@ -226,6 +228,10 @@ public class AutoAlgo1 {
 				} else {
 					removeLastPoint();
 				}
+			}
+			else if(first_return){
+				spinBy(180);
+				first_return = false;
 			}
 		} else {
 			if( Tools.getDistanceBetweenPoints(getLastPoint(), dronePoint) >=  max_distance_between_points) {
@@ -268,15 +274,17 @@ public class AutoAlgo1 {
 
 				int rotationAngle = 0;
 
+				//OUR CHANGE: if we dont go home
 				if (!SimulationWindow.return_home){
-					if (leftLidarDistance > 250 ) {
+					//When we are very far from the left wall we change the degrees to the left direction
+					if (leftLidarDistance > very_far ) {
 						rotationAngle = -90;
 					}
-
+					//when the lidar very close to the left wall, we go right
 					if (leftLidarDistance < 90 && leftLidarDistance > 0 ) {
 						rotationAngle = 5;
 					}
-
+					//when the lidar very close to the right wall, we go left
 					if (rightLidarDistance < 80 && rightLidarDistance > 0 ) {
 						rotationAngle = -10;
 					}
@@ -288,16 +296,17 @@ public class AutoAlgo1 {
 					if (frontLidarDistance < 120 && frontLidarDistance > 0) {
 						rotationAngle = 90;
 					}
-//
+
 				} else {
-					if (rightLidarDistance > 250) {
+					//When we are very far from the right wall we change the degrees to the right direction
+					if (rightLidarDistance > very_far) {
 						rotationAngle = 90;
 					}
-
+					//when the lidar very close to the right wall, we go left
 					if (rightLidarDistance < 90 && rightLidarDistance > 0) {
 						rotationAngle = -5;
 					}
-
+					//when the lidar very close to the left wall, we go right
 					if (leftLidarDistance < 80 && leftLidarDistance > 0) {
 						rotationAngle = 10;
 					}
@@ -309,13 +318,6 @@ public class AutoAlgo1 {
 					if (frontLidarDistance < 120 && frontLidarDistance > 0) {
 						rotationAngle = -90;
 					}
-
-					if (activeMission){
-						rotationAngle = 90;
-						activeMission = false;
-					}
-
-
 
 					if (Tools.getDistanceBetweenPoints(this.getLastPoint(), dronePoint) < this.max_distance_between_points) {
 						this.removeLastPoint();
@@ -331,8 +333,7 @@ public class AutoAlgo1 {
 				});
 			}
 		}
-			
-		//}
+
 	}
 
 	int counter = 0;
