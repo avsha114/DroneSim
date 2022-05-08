@@ -89,7 +89,6 @@ public class AutoAlgo1 {
 		for(int i=0;i<drone.lidars.size();i++) {
 			Lidar lidar = drone.lidars.get(i);
 			double rotation = drone.getGyroRotation() + lidar.degrees;
-			//rotation = Drone.formatRotation(rotation);
 			for(int distanceInCM=0;distanceInCM < lidar.current_distance;distanceInCM++) {
 				Point p = Tools.getPointByDistance(fromPoint, rotation, distanceInCM);
 				setPixel(p.x,p.y,PixelState.explored);
@@ -229,10 +228,7 @@ public class AutoAlgo1 {
 				}
 			}
 		} else {
-			if( Tools.getDistanceBetweenPoints(getLastPoint(), dronePoint) >=  max_distance_between_points
-
-//				&& !drone.realMap.isCollide((int)dronePoint.x, (int)dronePoint.y)
-			) {
+			if( Tools.getDistanceBetweenPoints(getLastPoint(), dronePoint) >=  max_distance_between_points) {
 				points.add(dronePoint);
 				mGraph.addVertex(dronePoint);
 			}
@@ -326,7 +322,7 @@ public class AutoAlgo1 {
 					}
 				}
 
-				spinBy(spin_by,true,new Func() { 
+				spinBy(rotationAngle,true,new Func() {
 						@Override
 						public void method() {
 							try_to_escape = false;
